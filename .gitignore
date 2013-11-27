@@ -1,0 +1,11 @@
+# our libraries directory
+/libs
+
+# Visual Studio Directories
+Debug
+Release
+
+# Visual Studio Files
+*.aps
+*.sdf
+*.user

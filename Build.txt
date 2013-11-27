@@ -1,0 +1,10 @@
+Debug configuration is not working at all!
+Use release configuration to build.
+Disable optimizition to ease debugging.
+The author suggests WinDbg as debugger to debug code in remote process.
+
+Order
+1. ITH_SYS, IHF_EnableSEH
+2. IHF, IHF_DLL, ITH_TinyXmlLib
+3. ITH_HasLib, ITH_TLS, ITH_Engine
+4. ITH, ITH_Updater
