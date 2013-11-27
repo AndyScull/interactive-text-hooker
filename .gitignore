@@ -9,3 +9,5 @@ Release
 *.aps
 *.sdf
 *.user
+*.opensdf
+*.suo
