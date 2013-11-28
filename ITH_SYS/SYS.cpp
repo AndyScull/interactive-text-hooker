@@ -547,7 +547,6 @@ void CheckThreadStart()
 BOOL IthInitSystemService()
 {
 	PPEB peb;
-	LPWSTR t,obj;
 	NTSTATUS status;
 	DWORD size;
 	ULONG LowFragmentHeap; 
@@ -556,6 +555,7 @@ BOOL IthInitSystemService()
 	IO_STATUS_BLOCK ios;
 	HANDLE codepage_file;
 	LARGE_INTEGER sec_size={0x1000,0};
+
 	__asm
 	{
 		mov eax,fs:[0x18]
@@ -567,26 +567,22 @@ BOOL IthInitSystemService()
 	debug = peb->BeingDebugged;
 	LowFragmentHeap=2;
 	hHeap=RtlCreateHeap(0x1002,0,0,0,0,0);
-	RtlSetHeapInformation(hHeap,HeapCompatibilityInformation,&LowFragmentHeap,sizeof(LowFragmentHeap));
+	RtlSetHeapInformation(hHeap, HeapCompatibilityInformation, &LowFragmentHeap, sizeof(LowFragmentHeap));
 	MEMORY_BASIC_INFORMATION info;
 	status = NtQueryVirtualMemory(NtCurrentProcess(), peb->ReadOnlySharedMemoryBase,
 		MemoryBasicInformation, &info, sizeof(info), &size);
 	if (!NT_SUCCESS(status)) return FALSE;
-	DWORD base = (DWORD)peb->ReadOnlySharedMemoryBase;
-	DWORD end = base + info.RegionSize - 0x40;
-	static WCHAR system32[] = L"system32";
-	for (;base < end; base += 2)
-	{
-		if (memcmp((PVOID)base, system32, 0x10) == 0)
-		{
-			t = (LPWSTR)base;
-			while (*t-- != L':');
-			obj = (LPWSTR)base;
-			while (*obj != L'\\') obj++;
-			break;
-		}
-	}
-	if (base == end) return FALSE;
+
+	// get the path to C:\Windows\System32
+	wchar_t windows_system_path[MAX_PATH];
+	GetSystemDirectory(windows_system_path, MAX_PATH);
+	// get our terminal services session id
+	DWORD session_id;
+	ProcessIdToSessionId(GetCurrentProcessId(), &session_id);
+	// create a path to the kernel BaseNamedObjects
+	wchar_t obj[MAX_PATH];
+	wsprintf(obj, L"\\Sessions\\%d\\BaseNamedObjects", session_id);
+
 	LDR_DATA_TABLE_ENTRY *ldr_entry = (LDR_DATA_TABLE_ENTRY*)peb->Ldr->InLoadOrderModuleList.Flink;
 	wcscpy(file_path+4,ldr_entry->FullDllName.Buffer);
 	current_dir=wcsrchr(file_path,L'\\') + 1;
@@ -595,6 +591,7 @@ BOOL IthInitSystemService()
 	status = NtOpenFile(&dir_obj,FILE_LIST_DIRECTORY|FILE_TRAVERSE|SYNCHRONIZE,
 		&oa,&ios,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_DIRECTORY_FILE|FILE_SYNCHRONOUS_IO_NONALERT);
 	if (!NT_SUCCESS(status)) return FALSE;
+	
 	RtlInitUnicodeString(&us,obj);
 	status = NtOpenDirectoryObject(&root_obj,READ_CONTROL|0xF,&oa);
 	if (!NT_SUCCESS(status)) return FALSE;
@@ -608,11 +605,11 @@ BOOL IthInitSystemService()
 	}
 	else
 	{
-		wcscpy(file_path+4,t);
-		t=file_path;
-		while(*++t);
-		if (*(t-1)!=L'\\') *t++=L'\\';
-		wcscpy(t,L"C_932.nls");
+		// append the japanese locale file
+		wchar_t jp_codepage_path[MAX_PATH];
+		wcscat_s(jp_codepage_path, MAX_PATH, windows_system_path);
+		wcscat_s(jp_codepage_path, MAX_PATH, L"\\C_932.nls");
+
 		RtlInitUnicodeString(&us,file_path);
 		status = NtOpenFile(&codepage_file,FILE_READ_DATA,&oa,&ios,FILE_SHARE_READ,0);
 		if (!NT_SUCCESS(status)) return FALSE;
