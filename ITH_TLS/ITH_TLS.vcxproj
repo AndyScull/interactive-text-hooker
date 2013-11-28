@@ -41,6 +41,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)libs\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -53,6 +54,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ITH_TLS_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -75,7 +77,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <DisableSpecificWarnings>4996;4731</DisableSpecificWarnings>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
@@ -92,7 +94,7 @@
       <AdditionalLibraryDirectories>..\libs</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>$(SolutionDir)DLL_PostBuild $(SolutionDir) $(ProjectName)</Command>
+      <Command>$(SolutionDir)DLL_PostBuild $(SolutionDir) $(ProjectName) $(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -41,6 +41,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -57,6 +58,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;IHF_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -64,6 +66,9 @@
       <AdditionalDependencies>comctl32.lib;ntdll.lib;ith_sys.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\libs</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>$(SolutionDir)DLL_PostBuild $(SolutionDir) $(ProjectName) $(Configuration)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -79,7 +84,7 @@
       <DisableSpecificWarnings>4996;4146</DisableSpecificWarnings>
       <ExceptionHandling>false</ExceptionHandling>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
@@ -96,7 +101,7 @@
       <AdditionalDependencies>comctl32.lib;ntdll.lib;ith_sys.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>$(SolutionDir)DLL_PostBuild $(SolutionDir) $(ProjectName)</Command>
+      <Command>$(SolutionDir)DLL_PostBuild $(SolutionDir) $(ProjectName) $(Configuration)</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>
