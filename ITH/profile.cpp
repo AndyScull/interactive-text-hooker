@@ -606,9 +606,9 @@ void Profile::RemoveHook(int index)
 {
 	if (index >= 0 && index < hook_count)
 	{
-		int i;
-		if (hooks[i].name) delete hooks[i].name;
+		if (hooks[index].name) delete hooks[index].name;
 		hook_count--;
+		int i;
 		for (i = index; i < hook_count; i++)
 		{
 			hooks[i] = hooks[i + 1];
