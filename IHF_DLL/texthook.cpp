@@ -305,7 +305,7 @@ int MapInstruction(DWORD original_addr, DWORD new_addr, BYTE& hook_len, BYTE& or
 				sub edx,eax
 				mov [eax-4],edx
 			}
-			if (r-(BYTE*)original_addr<5-l) return -1; //Not safe to move intruction right after short jmp.
+			if ( (r-(BYTE*)original_addr) < (signed) (5-l) ) return -1; //Not safe to move intruction right after short jmp.
 			else flag=1;
 		}
 		else if (*r==0xE8||*r==0xE9)
