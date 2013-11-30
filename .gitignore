@@ -4,6 +4,7 @@
 # Visual Studio Directories
 Debug
 Release
+/ipch
 
 # Visual Studio Files
 *.aps

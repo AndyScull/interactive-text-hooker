@@ -16,7 +16,7 @@
  */
 
 
-#include <ITH\Hash.h>
+#include "ITH\Hash.h"
 
 /* FIPS 180-2: Secure Hash Standard (SHS)
 // http://csrc.nist.gov/publications/fips/fips180-2/fips180-2withchangenotice.pdf
