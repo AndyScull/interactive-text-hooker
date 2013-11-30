@@ -1,10 +1,8 @@
-Debug configuration is not working at all!
-Use release configuration to build.
-Disable optimizition to ease debugging.
-The author suggests WinDbg as debugger to debug code in remote process.
+Requirements to Compile
 
-Order
-1. ITH_SYS, IHF_EnableSEH
-2. IHF, IHF_DLL, ITH_TinyXmlLib
-3. ITH_HasLib, ITH_TLS, ITH_Engine
-4. ITH, ITH_Updater
+1. Visual Studio 2010
+2. Windows Driver Kit 8.1
+
+Note: If the driver kit path is currently hard coded but there are plans to resolve this.
+
+Both Debug and Release work correctly but you will need to do a full rebuild to switch between them.
