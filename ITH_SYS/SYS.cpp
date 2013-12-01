@@ -15,12 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// disable C++ exceptions in STL
+#define _HAS_EXCEPTIONS 0
+#define _STATIC_CPPLIB
+
+#include <string>
+
 #include <windows.h>
+
 #include <ITH\ntdll.h>
 #include <ITH\IHF_SYS.h>
+
 #define SEC_BASED 0x200000
-WCHAR file_path[MAX_PATH]=L"\\??\\";
-LPWSTR current_dir;
 LPVOID page;
 DWORD page_locale;
 DWORD current_process_id,debug;
@@ -45,6 +51,22 @@ BYTE LeadByteTable[0x100]={
 };
 BYTE launch_time[0x10];
 static BYTE file_info[0x1000];
+
+std::wstring SYS_get_executable_path()
+{
+	// get the full path of the executable
+	wchar_t module_filepath[MAX_PATH] = { 0 };
+	GetModuleFileName(GetModuleHandle(NULL), module_filepath, MAX_PATH);
+	// strip the filename and trailing slash
+	std::wstring executable_path = module_filepath;
+	size_t slash_pos = executable_path.rfind(L'\\');
+	if( slash_pos != std::string::npos ) {
+		executable_path.erase(slash_pos);
+	}
+	
+	return executable_path;
+}
+
 DWORD GetShareMemory()
 {
 	__asm
@@ -583,11 +605,10 @@ BOOL IthInitSystemService()
 	wchar_t obj[MAX_PATH];
 	wsprintf(obj, L"\\Sessions\\%d\\BaseNamedObjects", session_id);
 
-	LDR_DATA_TABLE_ENTRY *ldr_entry = (LDR_DATA_TABLE_ENTRY*)peb->Ldr->InLoadOrderModuleList.Flink;
-	wcscpy(file_path+4,ldr_entry->FullDllName.Buffer);
-	current_dir=wcsrchr(file_path,L'\\') + 1;
-	*current_dir = 0;
-	RtlInitUnicodeString(&us,file_path);
+	// get the directory we are install to
+	std::wstring executable_path = L"\\??\\" + SYS_get_executable_path();
+
+	RtlInitUnicodeString(&us, executable_path.c_str());
 	status = NtOpenFile(&dir_obj,FILE_LIST_DIRECTORY|FILE_TRAVERSE|SYNCHRONIZE,
 		&oa,&ios,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_DIRECTORY_FILE|FILE_SYNCHRONOUS_IO_NONALERT);
 	if (!NT_SUCCESS(status)) return FALSE;
@@ -605,12 +626,12 @@ BOOL IthInitSystemService()
 	}
 	else
 	{
-		// append the japanese locale file
-		wchar_t jp_codepage_path[MAX_PATH];
-		wcscat_s(jp_codepage_path, MAX_PATH, windows_system_path);
-		wcscat_s(jp_codepage_path, MAX_PATH, L"\\C_932.nls");
+		// create the japanese codepage filepath
+		std::wstring jp_codepage_filepath = L"\\??\\";
+		jp_codepage_filepath += windows_system_path;
+		jp_codepage_filepath += L"\\C_932.nls";
 
-		RtlInitUnicodeString(&us,file_path);
+		RtlInitUnicodeString(&us, jp_codepage_filepath.c_str());
 		status = NtOpenFile(&codepage_file,FILE_READ_DATA,&oa,&ios,FILE_SHARE_READ,0);
 		if (!NT_SUCCESS(status)) return FALSE;
 		oa.hRootDirectory=root_obj;
@@ -656,7 +677,6 @@ void IthCloseSystemService()
 BOOL IthCheckFile(LPWSTR file)
 {
 	//return IthGetFileInfo(file,file_info);
-	//wcscpy(current_dir,file);
 	HANDLE hFile;
 	UNICODE_STRING us;
 	RtlInitUnicodeString(&us,file);

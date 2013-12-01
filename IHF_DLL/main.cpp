@@ -35,7 +35,6 @@ HANDLE hSendThread,hCmdThread,hFile,hMutex,hmMutex;
 DWORD hook_buff_len=HOOK_BUFFER_SIZE;
 //DWORD current_process_id;
 extern DWORD enter_count;
-//extern LPWSTR current_dir;
 extern DWORD engine_type;
 extern DWORD module_base;
 AVLTree<char, FunctionInfo, SCMP, SCPY, SLEN> *tree;
@@ -139,7 +138,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 		for (p = GetMainModulePath(); *p; p++);
 		for (p = p; *p != L'\\'; p--);
 		wcscpy(dll_name,p+1);
-		//swprintf(dll_mutex,L"ITH_%.4d_%s",current_process_id,current_dir);
 		swprintf(dll_mutex,L"ITH_%d",current_process_id);
 		swprintf(hm_mutex,L"ITH_HOOKMAN_%d",current_process_id);
 		hmMutex=IthCreateMutex(hm_mutex,0);

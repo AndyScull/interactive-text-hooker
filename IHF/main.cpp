@@ -34,7 +34,6 @@ static WCHAR EngineName[]=L"ITH_engine.dll";
 static WCHAR DllName[]=L"IHF_DLL.dll";
 static HANDLE hMutex;
 static DWORD admin;
-//extern LPWSTR current_dir;
 extern CRITICAL_SECTION detach_cs;
 
 SettingManager* setman;
