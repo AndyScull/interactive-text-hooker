@@ -18,6 +18,7 @@
 // disable C++ exceptions in STL
 #define _HAS_EXCEPTIONS 0
 #define _STATIC_CPPLIB
+#define _DISABLE_DEPRECATE_STATIC_CPPLIB
 
 #include <string>
 
@@ -28,7 +29,7 @@
 
 #define SEC_BASED 0x200000
 LPVOID page;
-DWORD page_locale;
+UINT page_locale;
 DWORD current_process_id,debug;
 HANDLE hHeap, root_obj, dir_obj, codepage_section, thread_man_section;
 BYTE LeadByteTable[0x100]={
@@ -51,6 +52,27 @@ BYTE LeadByteTable[0x100]={
 };
 BYTE launch_time[0x10];
 static BYTE file_info[0x1000];
+
+std::wstring SYS_get_base_named_objects_path()
+{
+	std::wstring base_name_objects_path;
+
+	// get our terminal services session id
+	DWORD session_id;
+	ProcessIdToSessionId(GetCurrentProcessId(), &session_id);
+	// create a path to the kernel BaseNamedObjects
+	if( session_id == 0 ) {
+		// there is no 0 session, this just means an OS without terminal services
+		base_name_objects_path = L"\\BaseNamedObjects";
+	}
+	else {
+		wchar_t path_buffer[MAX_PATH];
+		wsprintf(path_buffer, L"\\Sessions\\%d\\BaseNamedObjects", session_id);
+		base_name_objects_path = path_buffer;
+	}
+
+	return base_name_objects_path;
+}
 
 std::wstring SYS_get_executable_path()
 {
@@ -571,7 +593,6 @@ BOOL IthInitSystemService()
 	PPEB peb;
 	NTSTATUS status;
 	DWORD size;
-	ULONG LowFragmentHeap; 
 	UNICODE_STRING us;
 	OBJECT_ATTRIBUTES oa={sizeof(oa),0,&us,OBJ_CASE_INSENSITIVE,0,0};
 	IO_STATUS_BLOCK ios;
@@ -586,46 +607,39 @@ BOOL IthInitSystemService()
 		mov peb,eax
 			mov current_process_id,ecx
 	}
+	// FIXME: this is now the last usage of peb
 	debug = peb->BeingDebugged;
-	LowFragmentHeap=2;
-	hHeap=RtlCreateHeap(0x1002,0,0,0,0,0);
-	RtlSetHeapInformation(hHeap, HeapCompatibilityInformation, &LowFragmentHeap, sizeof(LowFragmentHeap));
-	MEMORY_BASIC_INFORMATION info;
-	status = NtQueryVirtualMemory(NtCurrentProcess(), peb->ReadOnlySharedMemoryBase,
-		MemoryBasicInformation, &info, sizeof(info), &size);
-	if (!NT_SUCCESS(status)) return FALSE;
 
-	// get the path to C:\Windows\System32
-	wchar_t windows_system_path[MAX_PATH];
-	GetSystemDirectory(windows_system_path, MAX_PATH);
-	// get our terminal services session id
-	DWORD session_id;
-	ProcessIdToSessionId(GetCurrentProcessId(), &session_id);
-	// create a path to the kernel BaseNamedObjects
-	wchar_t obj[MAX_PATH];
-	wsprintf(obj, L"\\Sessions\\%d\\BaseNamedObjects", session_id);
+	// FIXME: we should be able to use the default heap setup by Windows
+	hHeap = RtlCreateHeap(HEAP_GROWABLE,0,0,0,0,0);
+
+	// initialize the name based objects, before this is done mutexes and
+	// critical sections do not work, thus neither does STL
+	std::wstring base_named_objects_path = SYS_get_base_named_objects_path();
+	RtlInitUnicodeString(&us, base_named_objects_path.c_str());
+	status = NtOpenDirectoryObject(&root_obj,READ_CONTROL|0xF,&oa);
+	if (!NT_SUCCESS(status)) return FALSE;
 
 	// get the directory we are install to
 	std::wstring executable_path = L"\\??\\" + SYS_get_executable_path();
-
 	RtlInitUnicodeString(&us, executable_path.c_str());
 	status = NtOpenFile(&dir_obj,FILE_LIST_DIRECTORY|FILE_TRAVERSE|SYNCHRONIZE,
 		&oa,&ios,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_DIRECTORY_FILE|FILE_SYNCHRONOUS_IO_NONALERT);
 	if (!NT_SUCCESS(status)) return FALSE;
 	
-	RtlInitUnicodeString(&us,obj);
-	status = NtOpenDirectoryObject(&root_obj,READ_CONTROL|0xF,&oa);
-	if (!NT_SUCCESS(status)) return FALSE;
-
-	page = peb->InitAnsiCodePageData;
-	page_locale = *(DWORD*)page >> 16;
-	if (page_locale == 0x3A4)
+	// check for Japanese codepage
+	page_locale = GetACP();
+	if( page_locale == 932 )
 	{
 		oa.hRootDirectory = root_obj;
 		oa.uAttributes |= OBJ_OPENIF;
 	}
 	else
 	{
+		OutputDebugString(L"3.2");
+		// get the path to C:\Windows\System32
+		wchar_t windows_system_path[MAX_PATH];
+		GetSystemDirectory(windows_system_path, MAX_PATH);
 		// create the japanese codepage filepath
 		std::wstring jp_codepage_filepath = L"\\??\\";
 		jp_codepage_filepath += windows_system_path;
@@ -661,7 +675,7 @@ BOOL IthInitSystemService()
 //After destroying the heap, all memory allocated by ITH module is returned to system.
 void IthCloseSystemService()
 {
-	if (page_locale!=0x3A4)
+	if( page_locale != 932 )
 	{
 		NtUnmapViewOfSection(NtCurrentProcess(),page);
 		NtClose(codepage_section);

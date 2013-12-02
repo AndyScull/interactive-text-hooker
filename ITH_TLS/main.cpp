@@ -34,9 +34,7 @@ BOOL WINAPI DllMain(HANDLE hModule, DWORD reason, LPVOID lpReserved)
 	case DLL_PROCESS_ATTACH:
 		{
 			LdrDisableThreadCalloutsForDll(hModule);
-			DWORD LowFragmentHeap=2;
-			hHeap=RtlCreateHeap(0x1002,0,0,0,0,0);
-			RtlSetHeapInformation(hHeap,HeapCompatibilityInformation,&LowFragmentHeap,sizeof(LowFragmentHeap));
+			hHeap = RtlCreateHeap(HEAP_GROWABLE,0,0,0,0,0);
 		}
 		break;
 	case DLL_PROCESS_DETACH:	
