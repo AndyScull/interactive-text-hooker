@@ -1,10 +1,11 @@
 # our libraries directory
-/libs
+/lib
 
 # Visual Studio Directories
 Debug
 Release
 /ipch
+/obj
 
 # Visual Studio Files
 *.aps
