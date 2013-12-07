@@ -16,7 +16,6 @@
  */
 
 #include <ITH\HookManager.h>
-#include <ITH\version.h>
 #include <ITH\IHF_SYS.h>
 #include <ITH\ntdll.h>
 #include <ITH\BitMap.h>

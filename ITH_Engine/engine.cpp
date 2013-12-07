@@ -19,7 +19,9 @@
 #include <ITH\IHF_DLL.h>
 #include <ITH\IHF_SYS.h>
 #include <ITH\ntdll.h>
-#include <ITH\version.h>
+
+static wchar_t engine_version[] = L"3.1.0000";
+
 WCHAR process_name[MAX_PATH];
 //HANDLE hEngineOn;
 struct CodeSection
@@ -3236,7 +3238,7 @@ DWORD DetermineNoHookEngine()
 DWORD DetermineEngineType()
 {
 	WCHAR engine_info[0x100];
-	swprintf(engine_info, L"Engine support module %s", build_date);
+	swprintf(engine_info, L"Engine support module v%s", engine_version);
 	OutputConsole(engine_info);
 	if (DetermineEngineByFile1()==0) return 0;
 	if (DetermineEngineByFile2()==0) return 0;

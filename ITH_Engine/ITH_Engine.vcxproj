@@ -96,9 +96,7 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalLibraryDirectories>..\libs;C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x86</AdditionalLibraryDirectories>
     </Link>
-    <PreBuildEvent>
-      <Command>$(SolutionDir)BuildDate $(SolutionDir)</Command>
-    </PreBuildEvent>
+    <PreBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="engine.cpp" />
