@@ -1,8 +1,9 @@
 Requirements to Compile
 
-1. Visual Studio 2010
-2. Windows Driver Kit 8.1
+1. Visual C++ 2010 Express
+2. Windows Driver Kit 7.1 (7600.16385.1)
 
-Note: If the driver kit path is currently hard coded but there are plans to resolve this.
+- create lib\ folder and put ntdll.lib (from WDK) into it
 
-Both Debug and Release work correctly but you will need to do a full rebuild to switch between them.
+- after build, Release folder contains all 
+required DLL, Clean Solution does not delete them
