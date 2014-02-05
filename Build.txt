@@ -4,6 +4,9 @@ Requirements to Compile
 2. Windows Driver Kit 7.1 (7600.16385.1)
 
 - create lib\ folder and put ntdll.lib (from WDK) into it
+- copy winres.h from WDK to include folder
+
+
 
 - after build, Release folder contains all 
 required DLL, Clean Solution does not delete them

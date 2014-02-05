@@ -261,6 +261,45 @@ DWORD IHFAPI OutputConsole(LPWSTR str)
 	}
 	return 0;
 }
+
+// AndyScull - for compatibility with VNR code
+DWORD IHFAPI ConsoleOutput(LPSTR str)
+{
+	
+	if (live)
+	if (str)
+	{
+		int t, len, sum, slen;
+		slen = strlen(str) + 1;
+		len = MultiByteToWideChar(CP_ACP, 0, str, slen, 0, 0);
+		wchar_t* wstr = new wchar_t[len];
+		MultiByteToWideChar(CP_ACP, 0, str, slen, wstr, len);
+
+		BYTE buffer[0x80];
+		BYTE *buff;
+		len = wcslen(wstr) << 1;
+		t = swprintf((LPWSTR)(buffer + 8),L"%d: ",current_process_id) << 1;
+		sum = len + t + 8;
+		if (sum > 0x80) 
+		{
+			buff = new BYTE[sum];
+			memcpy(buff + 8, buffer + 8, t);			
+		}
+		else buff = buffer;
+		*(DWORD*)buff = IHF_NOTIFICATION; //cmd
+		*(DWORD*)(buff + 4) = IHF_NOTIFICATION_TEXT; //console
+		memcpy(buff + t + 8, wstr, len);
+		IO_STATUS_BLOCK ios;
+		NtWriteFile(hPipe,0,0,0,&ios,buff,sum,0,0);
+		if (buff!=buffer) delete buff;
+		delete wstr;
+		return len;
+	}
+	return 0;
+}
+
+
+
 DWORD IHFAPI OutputDWORD(DWORD d)
 {
 	WCHAR str[0x10];

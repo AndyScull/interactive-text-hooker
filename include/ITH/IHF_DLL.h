@@ -24,6 +24,7 @@
 #endif
 extern "C" {
 	DWORD IHFAPI OutputConsole(LPWSTR str);
+	DWORD IHFAPI ConsoleOutput(LPSTR str);
 	DWORD IHFAPI OutputDWORD(DWORD d);
 	DWORD IHFAPI OutputRegister(DWORD *base);
 	DWORD IHFAPI NotifyHookInsert(DWORD addr);

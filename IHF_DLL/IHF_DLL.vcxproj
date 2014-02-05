@@ -118,6 +118,7 @@
     <ClCompile Include="texthook.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\ITH\IHF_DLL.h" />
     <ClInclude Include="IHF_CLIENT.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

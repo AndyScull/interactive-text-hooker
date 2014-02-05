@@ -29,5 +29,8 @@
     <ClInclude Include="IHF_CLIENT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\ITH\IHF_DLL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

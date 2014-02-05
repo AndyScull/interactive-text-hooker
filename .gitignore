@@ -5,6 +5,7 @@
 Debug
 Release
 /ipch
+/libs
 /obj
 
 # Visual Studio Files
